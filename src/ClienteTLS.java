@@ -24,7 +24,7 @@ import javax.net.ssl.TrustManager;
 ****************************************************************************/
 public class ClienteTLS {
 
-private static String 	raizMios     = "C:/Users/Administrador/Documents/";
+private static String 	raizMios     = "C:\\Users\\lorev\\Desktop\\seg"; 
 
 public static void main(String[] args) throws Exception {
  
@@ -33,14 +33,14 @@ public static void main(String[] args) throws Exception {
  String 	path 				= null;
  char[] 	contraseña 		  	= "123456".toCharArray();
  char[] 	contraseñaEntrada 	= "123456".toCharArray();
- String[]   cipherSuites = null;
+ String[]   cipherSuites = null;//CipherSuites se va a utilizar para guardar la informacion sobre los algoritmos utilizados en la conexión SSL
 	    
  
- definirKeyStoresMios();
+ definirKeyStoresMios();//EIIIIIIIIIIII
 
  for (int i = 0; i < args.length; i++)
      System.out.println(args[i]);
-
+//Deben introducirse 3 entradas por linea de comando (host,port,path)
  if (args.length < 3) {
      System.out.println(
          "USAGE: java SSLSocketClientWithClientAuth " +
@@ -64,24 +64,28 @@ public static void main(String[] args) throws Exception {
       * Set up a key manager for client authentication if asked by the server.  
       * Use the implementation's default TrustStore and secureRandom routines.
       ****************************************************************************/
-     SSLSocketFactory factory = null;
+     SSLSocketFactory factory = null;//Socket
 
-     SSLContext 		ctx;
-     KeyManagerFactory 	kmf;
-     KeyStore 			ks;
+     SSLContext 		ctx;// Para la implementacion de un socket seguro
+     KeyManagerFactory 	kmf;//Esta clase funciona como una fábrica de claves seguras
+     KeyStore 			ks;//Para almacenar claves criptográficas y CERTIFICADOS
 
      try {
 	
-	         ctx = SSLContext.getInstance("TLS");   
+	         ctx = SSLContext.getInstance("TLS"); //Devuelve un contexto SSL que utilice el protocolo TLS  
 
 	         // Definir el/los KeyManager.
 	         //    Ahora son necesarios ya que el cliente necesita autenticarnse
 	         //    y por tanto al SSL tenemos que informarle de donde tomar las
 	         //    credenciales del cliente.
 	         //
-	         kmf = KeyManagerFactory.getInstance("SunX509");
-	         ks = KeyStore.getInstance("JCEKS");
+	         kmf = KeyManagerFactory.getInstance("SunX509");//"SunX509" se refiere al proveedor de JSSE Java puro de Oracle America
+	         ks = KeyStore.getInstance("JCEKS");//Estamos proporcionando un tipo de almacén de claves específico,en este caso en el almacén
+	                                            //proporcionado por el proveedor de SunJCE.
 			 ks.load(new FileInputStream(raizMios + "KeyStoreCliente_2017.jce"), contraseña);
+			 /*Se proporciona una clave para poder desbloquear el almacén, y un directorio de almacenamiento de esas claves(AUN NO SE DONDE
+			  * CONSEGUIR ESE JCE*/
+			                                           
 	         kmf.init(ks, contraseña);
 	         
 	         /*  Se inicializa el contexto pasandole:
@@ -101,6 +105,10 @@ public static void main(String[] args) throws Exception {
         	 *********************************************************************/
 	         System.out.println ("******** CypherSuites Disponibles **********");
  	   	     cipherSuites = factory.getSupportedCipherSuites();
+ 	   	     /*Devuelve los nombres de las suites de cifrado que podrían habilitarse para su uso en una conexión SSL. Normalmente, 
+ 	   	      * solo un subconjunto de estos se habilitará de manera predeterminada, ya que esta lista puede
+ 	   	      *  incluir conjuntos de cifrado que no cumplen con los requisitos de calidad de servicio para esos valores predeterminados. 
+ 	   	      */
  	   	     for (int i=0; i<cipherSuites.length; i++) 
  	       		System.out.println (cipherSuites[i]);	    
  		   	    
@@ -109,6 +117,8 @@ public static void main(String[] args) throws Exception {
  	   	     System.out.println ("****** CypherSuites Habilitadas por defecto **********");
  	   	    
  	   	     String[] cipherSuitesDef = factory.getDefaultCipherSuites();
+ 	   	     /*Devuelve la lista de suites de cifrado que están habilitadas de forma predeterminada. A menos que se habilite una lista diferente,
+ 	   	     el protocolo de enlace en una conexión SSL utilizará uno de estos conjuntos de cifrado.*/
  	   	     for (int i=0; i<cipherSuitesDef.length; i++) 
  	       		 System.out.println (cipherSuitesDef[i]);
      
@@ -116,6 +126,7 @@ public static void main(String[] args) throws Exception {
      } catch (Exception e) {
          					throw new IOException(e.getMessage());
      					   }
+     
      
       SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
 
@@ -135,22 +146,34 @@ public static void main(String[] args) throws Exception {
       --------------------------------------------------------------------------------------*/
      
      
- /***/
-     String[]   cipherSuitesHabilitadas = {"TLS_RSA_WITH_AES_128_CBC_SHA"};
-     										
+ 
+ 	    /* (SSL_TipoNegClave_[EXPORT]_WITH_AlgCifrado_AlgHash_PRF)--->este es el formato utilizado
+ 	   
+ 	  
+ 	    o AlgCifrado: Algoritmo de cifrado a usar por el Protocolo Record.
+ 	          o Si cifrado en bloque: NombreAlgoritmo_ modotrabajo
+ 	          o Si cifrado en Flujo: NombreAlgoritmo_LongitudClave
+ 	   */
+     String[]   cipherSuitesHabilitadas = {"TLS_RSA_WITH_AES_128_CBC_SHA"};//(128-->LONGITUD CLAVE)
+     			/*CipherSuites se va a utilizar para especificar (es como una variable que guarda los algoritmos que se utilizan):
+     			 *  un algoritmo de intercambio de claves,
+     			 *  un algoritmo de cifrado masivo y
+     			 *  un algoritmo de código de autenticación de mensajes (MAC)
+     			 * 							
+     			 */
      
 	 //cipherSuitesHabilitadas[0] = cipherSuites[0];
 
 	 System.out.println (cipherSuitesHabilitadas[0]);
 	 
      
-	 socket.setEnabledCipherSuites(cipherSuitesHabilitadas);
+	 socket.setEnabledCipherSuites(cipherSuitesHabilitadas);//Guardamos ya las suites que queremos nosotros
 
  	 System.out.println ("****** CypherSuites Habilitadas en el ssl socket **********");
 
 	 String[] cipherSuitesHabilSocket = socket.getEnabledCipherSuites();
  	 for (int i=0; i<cipherSuitesHabilSocket.length; i++) 
-	       		System.out.println (cipherSuitesHabilSocket[i]);
+	       		System.out.println (cipherSuitesHabilSocket[i]);//Debería devolver lo que acabamos de meter
 	 
 /****/
      /*********************************************************************
@@ -164,7 +187,7 @@ public static void main(String[] args) throws Exception {
     System.out.println ("  Comienzo SSL Handshake -- Cliente y Server Autenticados");
     System.out.println ("  *************************************************************");	    
    
-    socket.startHandshake();
+    socket.startHandshake();//Iniciamos el protocolo Handshake que es el que lleva a cabo la negociacion entre cliente y servidor
     
     System.out.println ("\n*************************************************************");
     System.out.println ("Fin OK SSL Handshake");
@@ -174,7 +197,7 @@ public static void main(String[] args) throws Exception {
      PrintWriter out = new PrintWriter(
                            new BufferedWriter(
                            new OutputStreamWriter(
-                           socket.getOutputStream())));
+                           socket.getOutputStream())));//Deberia mostrar los acuerdos de la negociacion
      out.println("GET /" + path + " HTTP/1.1");
      out.println();
      out.flush();
@@ -210,7 +233,7 @@ public static void main(String[] args) throws Exception {
 *******************************************************/
 private static void definirKeyStoresMios()
 {
-	String 	raizMios     = "C:/Users/Administrador/Documents/";
+	 String 	raizMios     = "C:\\Users\\lorev\\Desktop\\seg"; 
 
 	// Almacen de claves
 	
