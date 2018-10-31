@@ -36,8 +36,8 @@ public static void main(String[] args) throws Exception {
  String[]   cipherSuites = null;//CipherSuites se va a utilizar para guardar la informacion sobre los algoritmos utilizados en la conexión SSL
 	    
  
- definirKeyStoresMios();//EIIIIIIIIIIII
- //PEPE
+ definirKeyStoresMios();//HOLA
+
 
  for (int i = 0; i < args.length; i++)
      System.out.println(args[i]);
